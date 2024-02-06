@@ -11,9 +11,6 @@ services:
     ports:
       - 80:80
       - 443:443
-    environment:
-      - CF_API_EMAIL=fraser@ninjalabs.co.uk
-      - CF_DNS_API_TOKEN=example123
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -26,7 +23,7 @@ services:
       - "traefik.http.routers.traefik.rule=Host(`traefik.speedbird.house`)"
       - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
-      - "traefik.http.middlewares.traefik-auth.basicauth.users=user:example123"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${BASIC_AUTH_DETAILS}"
       - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
       - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-secure.entrypoints=https"
