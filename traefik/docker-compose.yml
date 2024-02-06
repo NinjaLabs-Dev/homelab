@@ -13,10 +13,7 @@ services:
       - 443:443
     environment:
       - CF_API_EMAIL=fraser@ninjalabs.co.uk
-      # - CF_API_KEY=KfT0HjlKd2LcFe4FgySjgvk0rVVi-qUNSDyvX7AX
-      - CF_DNS_API_TOKEN=sHu5T35hXG9jdCEzXN__lwZpJnmq4yvuiUm4oubC
-      # - CF_ZONE_API_TOKEN=KfT0HjlKd2LcFe4FgySjgvk0rVVi-qUNSDyvX7AX
-      # - CF_DNS_API_TOKEN="e1IsxNwYeWJ2K0AIWR5Q4su9WogF89KaH9q7-ALO"
+      - CF_DNS_API_TOKEN=example123
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -29,7 +26,7 @@ services:
       - "traefik.http.routers.traefik.rule=Host(`traefik.speedbird.house`)"
       - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
-      - "traefik.http.middlewares.traefik-auth.basicauth.users=user:$$apr1$$p5FYqhfl$$bMTCXmkIHJyCsIRm/WF6v/"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=user:example123"
       - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
       - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-secure.entrypoints=https"
