@@ -1,0 +1,122 @@
+http:
+  routers:
+    pve-speedbird:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox.speedbird.house`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: pve-speedbird
+    ug-items:
+      entryPoints:
+        - "https"
+      rule: "Host(`items.ninjalabs.dev`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: ug-items
+    piaware:
+      entryPoints:
+        - "https"
+      rule: "Host(`radar.speedbird.house`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: true
+      service: piaware
+    fs22:
+      entryPoints:
+        - "https"
+      rule: "Host(`fs22.ninjalabs.dev`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: fs22
+    home-assistant:
+      entryPoints:
+        - "https"
+      rule: "Host(`home.speedbird.house`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: home-assistant
+    #idrac:
+    #  entryPoints:
+    #    - "https"
+    #  rule: "Host(`root.speedbird.house`)"
+    # https://github.com/techno-tim/techno-tim.github.io/blob/master/reference_files/traefik-portainer-ssl/traefik/config.yml#L89
+
+  services:
+    pve-speedbird:
+      loadBalancer:
+        servers:
+          - url: "https://10.0.1.31:8006"
+        passHostHeader: true
+    ug-items:
+      loadBalancer:
+        servers:
+          - url: "http://10.0.1.47"
+        passHostHeader: true
+    piaware:
+      loadBalancer:
+        servers:
+          - url: "http://piaware:8080"
+        passHostHeader: true
+    fs22:
+      loadBalancer:
+        servers:
+          - url: "http://10.0.1.244:8080"
+        passHostHeader: true
+    home-assistant:
+      loadBalancer:
+        servers:
+          - url: "http://10.0.1.143:8123"
+        passHostHeader: true
+
+  middlewares:
+    https-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+    https-redirect:
+      redirectScheme:
+        scheme: https
+    default-headers:
+      headers:
+        frameDeny: true
+        # sslRedirect: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+    idrac:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+    default-allowlist:
+      ipWhiteList:
+        sourceRange:
+          - "10.0.0.0/8"
+          - "192.168.0.0/16"
+          - "172.0.0.0/12"
+    secured:
+      chain:
+        middlewares:
+          - default-allowlist
+          - default-headers

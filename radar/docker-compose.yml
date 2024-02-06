@@ -1,0 +1,105 @@
+version: "3.0"
+
+services:
+  readsb:
+    image: ghcr.io/sdr-enthusiasts/docker-readsb-protobuf:latest
+    tty: true
+    container_name: readsb
+    hostname: readsb
+    restart: always
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    ports:
+      #- 8085:8080
+      - 30005:30005
+    environment:
+      - TZ=Europe/London
+      - READSB_DCFILTER=true
+      - READSB_DEVICE_TYPE=rtlsdr
+      - READSB_FIX=true
+      - READSB_GAIN=autogain
+      - READSB_LAT=${RADAR_LAT}
+      - READSB_LON=${RADAR_LONG}
+      - READSB_MODEAC=true
+      - READSB_RX_LOCATION_ACCURACY=2
+      - READSB_STATS_RANGE=true
+      - READSB_NET_ENABLE=true
+    volumes:
+      - readsbpb_rrd:/run/collectd
+      - readsbpb_autogain:/run/autogain
+      - /proc/diskstats:/proc/diskstats:ro
+    tmpfs:
+      - /run/readsb
+      - /var/log
+    networks:
+      - proxy
+      - radar
+  piaware:
+    image: ghcr.io/sdr-enthusiasts/docker-piaware:latest
+    tty: true
+    container_name: piaware
+    restart: always
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    ports:
+      - 8080:80
+      - 30003:30003
+      - 30006:30005
+    environment:
+      - TZ="Europe/London"
+      - FEEDER_ID=${PIAWARE_FEEDER_ID}
+      - RECEIVER_TYPE=rtlsdr
+      - BEASTHOST=readsb
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log
+    networks:
+      - proxy
+      - radar
+    depends_on: 
+      - readsb
+  fr24feed:
+    image: ghcr.io/sdr-enthusiasts/docker-flightradar24:latest
+    tty: true
+    container_name: fr24feed
+    restart: always
+    #ports:
+      #- 8754:8754
+    environment:
+      - FR24KEY=${FR24KEY}
+      - MLAT=yes
+    networks:
+      - proxy
+      - radar
+    depends_on: 
+      - readsb
+  adsbexchange:
+    image: ghcr.io/sdr-enthusiasts/docker-adsbexchange:latest
+    tty: true
+    container_name: adsbx
+    restart: always
+    environment:
+      - TZ=Europe/Londond
+      - LAT=${RADAR_LAT}
+      - LONG=${RADAR_LONG}
+      - BEASTHOST=readsb
+      - ALT=${RADAR_ALT}
+      - SITENAME=${ADBS_SITENAME}
+      - UUID=${ADBS_UUID}
+    tmpfs:
+      - /run:rw,nosuid,nodev,exec,relatime,size=64M,uid=1000,gid=1000
+    networks:
+      - proxy
+      - radar
+    depends_on: 
+      - readsb
+
+networks:
+  proxy:
+    external: true
+  radar:
+
+volumes:
+  readsbpb_rrd:
+  readsbpb_autogain:
+

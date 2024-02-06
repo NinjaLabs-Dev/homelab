@@ -1,0 +1,36 @@
+version: '3.5'
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: 100:100
+    network_mode: 'host'
+    ports:
+      - 8096:8096
+    volumes:
+      - /config/jellyfin/data/config:/config
+      - /config/jellyfin/data/cache:/cache
+      - /A380/share:/media
+    restart: 'unless-stopped'
+    environment:
+      - PGID=100
+      - PUID=100
+      - JELLYFIN_PublishedServerUrl=https://jelly.speedbird.house
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jelly.entrypoints=http"
+      - "traefik.http.routers.jelly.rule=Host(`jelly.speedbird.house`)"
+      - "traefik.http.middlewares.jelly-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.jelly.middlewares=jelly-https-redirect"
+      - "traefik.http.routers.jelly-secure.entrypoints=https"
+      - "traefik.http.routers.jelly-secure.rule=Host(`jelly.speedbird.house`)"
+      - "traefik.http.routers.jelly-secure.tls=true"
+      - "traefik.http.routers.jelly-secure.service=jellyfin"
+      - "traefik.http.services.jelly.loadbalancer.server.port=8096"
+      - "traefik.docker.network=proxy"
+
+networks:
+  proxy:
+    external: true

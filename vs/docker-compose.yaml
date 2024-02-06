@@ -1,0 +1,33 @@
+version: "3.1"
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    restart: unless-stopped
+    #ports:
+    #  - 8443:8443
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Etc/UTC
+      # - PASSWORD=password #optional
+      - HASHED_PASSWORD=d7004d8cc4b6e1520832a22f8a420f34a5ac885519ebcda56c8485df822b65b8
+      # - SUDO_PASSWORD=password #optional
+      # - SUDO_PASSWORD_HASH= #optional
+      # - PROXY_DOMAIN=code-server.my.domain #optional
+      - DEFAULT_WORKSPACE=/config/ #optional
+    volumes:
+      - /config/code-server/data:/config
+      - /config:/config/workspace
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vs.entrypoints=http"
+      - "traefik.http.routers.vs.rule=Host(`vs.speedbird.house`)"
+      - "traefik.http.middlewares.vs-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.vs.middlewares=vs-https-redirect"
+      - "traefik.http.routers.vs-secure.entrypoints=https"
+      - "traefik.http.routers.vs-secure.rule=Host(`vs.speedbird.house`)"
+      - "traefik.http.routers.vs-secure.tls=true"
+      - "traefik.http.routers.vs-secure.service=vs"
+      - "traefik.http.services.vs.loadbalancer.server.port=8443"
+      - "traefik.docker.network=proxy"
