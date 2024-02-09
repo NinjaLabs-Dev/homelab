@@ -12,6 +12,8 @@ services:
       - /config/jellyfin/data/cache:/cache
       - /A380/share:/media
     restart: 'unless-stopped'
+    env_file:
+      - stack.env
     environment:
       - PGID=100
       - PUID=100

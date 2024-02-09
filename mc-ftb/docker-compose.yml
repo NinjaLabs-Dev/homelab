@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  mc-ftb:
+    image: itzg/minecraft-server:java8-multiarch
+    container_name: mc-ftb
+    restart: unless-stopped
+    networks:
+      - proxy
+    ports:
+      - 25565:25565
+    env_file:
+      - stack.env
+    volumes:
+      - /config/mc-ftb/data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mc-ftb.entrypoints=http"
+      - "traefik.http.routers.mc-ftb.rule=Host(`mc.speedbird.house`)"
+      - "traefik.http.middlewares.mc-ftb-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.mc-ftb.middlewares=mc-ftb-https-redirect"
+      - "traefik.http.routers.mc-ftb-secure.entrypoints=https"
+      - "traefik.http.routers.mc-ftb-secure.rule=Host(`mc.speedbird.house`)"
+      - "traefik.http.routers.mc-ftb-secure.tls=true"
+      - "traefik.http.routers.mc-ftb-secure.service=mc-ftb"
+      - "traefik.http.services.mc-ftb.loadbalancer.server.port=25565"
+      - "traefik.docker.network=proxy"
+
+networks:
+  proxy:
+    external: true

@@ -10,8 +10,9 @@ services:
     devices:
       - /dev/bus/usb:/dev/bus/usb
     ports:
-      #- 8085:8080
       - 30005:30005
+    env_file:
+      - stack.env
     environment:
       - TZ=Europe/London
       - READSB_DCFILTER=true
@@ -45,6 +46,8 @@ services:
       - 8080:80
       - 30003:30003
       - 30006:30005
+    env_file:
+      - stack.env
     environment:
       - TZ="Europe/London"
       - FEEDER_ID=${PIAWARE_FEEDER_ID}
@@ -63,8 +66,8 @@ services:
     tty: true
     container_name: fr24feed
     restart: always
-    #ports:
-      #- 8754:8754
+    env_file:
+      - stack.env
     environment:
       - FR24KEY=${FR24KEY}
       - MLAT=yes
@@ -78,6 +81,8 @@ services:
     tty: true
     container_name: adsbx
     restart: always
+    env_file:
+      - stack.env
     environment:
       - TZ=Europe/Londond
       - LAT=${RADAR_LAT}
